@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  tryton:
+    image: tryton/tryton:latest
+    container_name: tryton
+#    command: tryton/tryton
+    environment:
+      DB_PASSWORD: tryton
+      DB_HOSTNAME: postgres
+    ports:
+      - "8000:8000"
+    networks:
+      - tryton
+  tryton-cron:
+    image: tryton/tryton:latest
+    container_name: tryton-cron
+    command: trytond-cron -d tryton
+    environment:
+      DB_PASSWORD: tryton
+      DB_HOSTNAME: postgres
+    networks:
+      - tryton
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tryton
+      POSTGRES_PASSWORD: tryton
+      POSTGRES_DATABASE: tryton
+    ports:
+      - '5432:5432'
+    expose:
+      - '5432'
+    volumes:
+      - type: bind
+        source: /opt/docker_volumes/postgres_data
+        target: /var/lib/postgresql/data
+    networks:
+      - tryton
+
+#  adminer_gl:
+#    image: adminer
+#    container_name: adminer_gl
+#    restart: unless-stopped
+#    ports:
+#      - '8080:8080'
+#    networks:
+#      - gestaolegal
+
+networks:
+  tryton:
+    name: tryton
